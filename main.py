@@ -1,15 +1,27 @@
-"""news-image-20261118 entry: copy the bundled news-summary image to the output.
+"""Copy the bundled news-summary image to the grader's output directory.
 
-The program runs with no network. It copies entry.png (the image this
-repository holds, a front-page summary of the world news of Wednesday
-18 November 2026) to /output/entry.png (or $MAKEFUN_OUTPUT_DIR/entry.png).
-Both runs write the same bytes because the source file is fixed.
+The entry image (entry.png, a front-page summary of the world news of
+Wednesday 18 November 2026) sits beside this program in the repository.
+The grader runs this program twice with no network; both runs write the
+same bytes, because the source file never changes.
 """
 import os
-import shutil
 from pathlib import Path
 
-src = Path(__file__).resolve().parent / "entry.png"
-out_dir = Path(os.environ.get("MAKEFUN_OUTPUT_DIR", "/output"))
-out_dir.mkdir(parents=True, exist_ok=True)
-shutil.copyfile(src, out_dir / "entry.png")
+HERE = Path(__file__).resolve().parent
+OUT = Path(os.environ.get("MAKEFUN_OUTPUT_DIR") or "/output")
+
+
+def main():
+    src = HERE / "entry.png"
+    data = src.read_bytes()
+    OUT.mkdir(parents=True, exist_ok=True)
+    dest = OUT / "entry.png"
+    dest.write_bytes(data)
+    # Fail loudly instead of shipping a truncated copy.
+    if dest.stat().st_size != len(data):
+        raise SystemExit("entry.png copy incomplete")
+
+
+if __name__ == "__main__":
+    main()
